@@ -4,35 +4,23 @@
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workbench ActiveDocument="Program.cs">
     <Files>
-      <File FileName="../TalentAPI/ClientApp/src/components/CustomerList.js" Line="14" Column="1" />
-      <File FileName="Program.cs" Line="28" Column="8" />
-      <File FileName="Controllers/SalesController.cs" Line="29" Column="14" />
-      <File FileName="Controllers/ProductsController.cs" Line="38" Column="10" />
-      <File FileName="Controllers/StoresController.cs" Line="32" Column="18" />
-      <File FileName="../TalentAPI/ClientApp/src/components/SalesModal.js" Line="33" Column="7" />
+      <File FileName="Program.cs" Line="15" Column="51" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
-          <Node name="DevTalentOnboardingAnu" expanded="True">
-            <Node name="DevTalentOnboardingAnu">
-              <Node name="Controllers" expanded="True" />
-              <Node name="Program.cs" selected="True" />
-            </Node>
-            <Node name="TalentAPI" expanded="True">
-              <Node name="ClientApp">
-                <Node name="src" expanded="True">
-                  <Node name="components" expanded="True" />
-                </Node>
-              </Node>
-            </Node>
-          </Node>
+          <Node name="DevTalentOnboardingAnu" expanded="True" />
         </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/anusnair/Projects/DevTalentOnboardingAnu/Controllers/SalesController.cs" relfile="Controllers/SalesController.cs" line="52" column="17" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
 </Properties>

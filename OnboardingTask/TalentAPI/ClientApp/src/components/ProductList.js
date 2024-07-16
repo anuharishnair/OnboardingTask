@@ -18,35 +18,50 @@ class ProductList extends React.Component {
         this.fetchProducts();
     }
 
-    fetchProducts = () => {
-        axios.get('https://localhost:7178/api/Products').then((response) => {
+    fetchProducts = async () => {
+        try {
+            const response = await axios.get('https://localhost:7178/api/Products');
             this.setState({ products: response.data });
-        });
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
     };
 
     handleProductOpen = (isEditing = false, product = null) => {
-        if (isEditing && product) {
-            this.setState({
-                modalOpen: true,
-                isEditingProduct: true,
-                editProductId: product.id,
-                productName: product.name,
-                productPrice: product.price,
-            });
-        } else {
-            this.setState({ modalOpen: true });
+        try {
+            if (isEditing && product) {
+                this.setState({
+                    modalOpen: true,
+                    isEditingProduct: true,
+                    editProductId: product.id,
+                    productName: product.name,
+                    productPrice: product.price,
+                });
+            } else {
+                this.setState({ modalOpen: true });
+            }
+        } catch (error) {
+            console.error('Error opening product modal:', error);
         }
     };
 
     handleCloseProduct = () => {
-        this.setState({ modalOpen: false, isEditingProduct: false, productName: '', productPrice: '', editProductId: null });
+        try {
+            this.setState({ modalOpen: false, isEditingProduct: false, productName: '', productPrice: '', editProductId: null });
+        } catch (error) {
+            console.error('Error closing product modal:', error);
+        }
     };
 
     handleProductChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value });
+        try {
+            this.setState({ [e.target.name]: e.target.value });
+        } catch (error) {
+            console.error('Error handling product change:', error);
+        }
     };
 
-    handleProductSubmit = () => {
+    handleProductSubmit = async () => {
         const { productName, productPrice, isEditingProduct, editProductId } = this.state;
 
         const productData = {
@@ -54,37 +69,66 @@ class ProductList extends React.Component {
             price: productPrice,
         };
 
-        if (isEditingProduct) {
-            axios.put(`https://localhost:7178/api/Products/${editProductId}`, productData).then((response) => {
+        try {
+            if (isEditingProduct) {
+                await axios.put(`https://localhost:7178/api/Products/${editProductId}`, productData);
                 this.setState({ modalOpen: false, isEditingProduct: false, productName: '', productPrice: '', editProductId: null });
-                this.fetchProducts();
-            });
-        } else {
-            axios.post('https://localhost:7178/api/Products', productData).then((response) => {
+            } else {
+                await axios.post('https://localhost:7178/api/Products', productData);
                 this.setState({ modalOpen: false, productName: '', productPrice: '' });
-                this.fetchProducts();
-            });
+            }
+            this.fetchProducts();
+        } catch (error) {
+            console.error('Error submitting product:', error);
         }
     };
 
     handleProductDelete = (id) => {
-        this.setState({ deleteConfirmationOpen: true, deleteProductId: id });
+        try {
+            this.setState({ deleteConfirmationOpen: true, deleteProductId: id });
+        } catch (error) {
+            console.error('Error setting delete confirmation:', error);
+        }
     };
 
-    confirmProductDelete = () => {
+    confirmProductDelete = async () => {
         const { deleteProductId } = this.state;
 
-        axios.delete(`https://localhost:7178/api/Products/${deleteProductId}`).then((response) => {
+        try {
+            await axios.delete(`https://localhost:7178/api/Products/${deleteProductId}`);
             this.setState({
                 deleteConfirmationOpen: false,
                 deleteProductId: null,
             });
             this.fetchProducts();
-        });
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
+    };
+
+    renderProductRows = () => {
+        const { products } = this.state;
+
+        return products.map((product) => (
+            <Table.Row key={product.id}>
+                <Table.Cell>{product.name}</Table.Cell>
+                <Table.Cell>{product.price}</Table.Cell>
+                <Table.Cell>
+                    <Button color="yellow" onClick={() => this.handleProductOpen(true, product)}>
+                        <Icon name="edit" /> Edit
+                    </Button>
+                </Table.Cell>
+                <Table.Cell>
+                    <Button color="red" onClick={() => this.handleProductDelete(product.id)}>
+                        <Icon name="delete" /> Delete
+                    </Button>
+                </Table.Cell>
+            </Table.Row>
+        ));
     };
 
     render() {
-        const { products, productName, productPrice, modalOpen, isEditingProduct, deleteConfirmationOpen } = this.state;
+        const { productName, productPrice, modalOpen, isEditingProduct, deleteConfirmationOpen } = this.state;
 
         return (
             <div style={{ paddingTop: '100px', textAlign: 'left' }}>
@@ -144,22 +188,7 @@ class ProductList extends React.Component {
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                        {products.map((product) => (
-                            <Table.Row key={product.id}>
-                                <Table.Cell>{product.name}</Table.Cell>
-                                <Table.Cell>{product.price}</Table.Cell>
-                                <Table.Cell>
-                                    <Button color="yellow" onClick={() => this.handleProductOpen(true, product)}>
-                                        <Icon name="edit" /> Edit
-                                    </Button>
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Button color="red" onClick={() => this.handleProductDelete(product.id)}>
-                                        <Icon name="delete" /> Delete
-                                    </Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
+                        {this.renderProductRows()}
                     </Table.Body>
                 </Table>
 

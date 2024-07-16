@@ -8,15 +8,13 @@ namespace DevTalentOnboardingAnu.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
+        [Required(ErrorMessage = "The Name field is required.")]
         public string Name { get; set; }
 
-        [Required]
-        [StringLength(200)]
+        [Required(ErrorMessage = "The Address field is required.")]
         public string Address { get; set; }
 
         [JsonIgnore]
-        public ICollection<Sale> ProductSold { get; set; }
+        public ICollection<Sales> ProductSold { get; set; }
     }
 }

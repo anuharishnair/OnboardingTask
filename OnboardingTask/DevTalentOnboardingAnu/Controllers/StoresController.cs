@@ -1,10 +1,10 @@
 ﻿using DevTalentOnboardingAnu.Models;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DevTalentOnboardingAnu.Controllers
 {
@@ -13,6 +13,7 @@ namespace DevTalentOnboardingAnu.Controllers
     public class StoresController : ControllerBase
     {
         private readonly TalentDbContext _context;
+
         public StoresController(TalentDbContext context)
         {
             _context = context;
@@ -20,69 +21,128 @@ namespace DevTalentOnboardingAnu.Controllers
 
         // Create
         [HttpPost]
-        public async Task<IActionResult> CreateStore([FromBody] Store store)
+        public async Task<IActionResult> CreateStoreAsync([FromBody] StoreDto storeDto)
         {
-            await _context.Stores.AddAsync(store);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return Ok(new { message = "Store Saved Successfully" });
+            try
+            {
+                var store = new Store
+                {
+                    Name = storeDto.Name,
+                    Address = storeDto.Address,
+                    ProductSold = new List<Sales>() // Initialize the navigation property if necessary
+                };
+
+                await _context.Stores.AddAsync(store);
+                await _context.SaveChangesAsync();
+
+                return Ok("Store Saved Successfully");
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while saving the store: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
 
         // Read
         [HttpGet]
-        public async Task<ActionResult<List<Store>>> GetStores()
+        public async Task<ActionResult<List<Store>>> GetStoresAsync()
         {
-            var stores = await _context.Stores.OrderByDescending(s => s.Id).ToListAsync();
-            return Ok(stores);
+            try
+            {
+                var stores = await _context.Stores.OrderByDescending(p => p.Id).ToListAsync();
+                return Ok(stores);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Store>> GetStoreById([FromRoute] long id)
+        public async Task<ActionResult<Store>> GetStoreByIdAsync([FromRoute] int id)
         {
-            var store = await _context.Stores.FirstOrDefaultAsync(s => s.Id == id);
-
-            if (store == null)
+            try
             {
-                return NotFound("Store is not found");
-            }
+                var store = await _context.Stores.FirstOrDefaultAsync(p => p.Id == id);
 
-            return Ok(store);
+                if (store == null)
+                {
+                    return NotFound("Store is not found");
+                }
+
+                return Ok(store);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
 
         // Update
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateStore([FromRoute] long id, [FromBody] Store updatedStore)
+        public async Task<IActionResult> UpdateStoreAsync([FromRoute] int id, [FromBody] StoreDto storeDto)
         {
-            var store = await _context.Stores.FirstOrDefaultAsync(p => p.Id == id);
-
-            if (store == null)
+            try
             {
-                return NotFound("Store is not found");
+                var store = await _context.Stores.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (store == null)
+                {
+                    return NotFound("Store is not found");
+                }
+
+                store.Name = storeDto.Name;
+                store.Address = storeDto.Address;
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Store Updated Successfully");
             }
-
-            store.Name = updatedStore.Name;
-            store.Address = updatedStore.Address;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Store Updated Successfully");
+            catch (DbUpdateException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while updating the store: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
 
         // Delete
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStore([FromRoute] long id)
+        public async Task<IActionResult> DeleteStoreAsync([FromRoute] int id)
         {
-            var store = await _context.Stores.FirstOrDefaultAsync(s => s.Id == id);
-
-            if (store == null)
+            try
             {
-                return NotFound("Store is not found");
+                var store = await _context.Stores.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (store == null)
+                {
+                    return NotFound("Store is not found");
+                }
+
+                _context.Stores.Remove(store);
+                await _context.SaveChangesAsync();
+
+                return Ok("Store Deleted Successfully");
             }
-
-            _context.Stores.Remove(store);
-            await _context.SaveChangesAsync();
-
-            return Ok("Store Deleted Successfully");
+            catch (DbUpdateException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while deleting the store: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
     }
 }

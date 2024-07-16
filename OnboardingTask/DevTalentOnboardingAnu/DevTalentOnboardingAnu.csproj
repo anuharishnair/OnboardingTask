@@ -19,13 +19,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="ViewModels\" />
-    <None Remove="Views\Customers\" />
     <None Remove="Migrations\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ViewModels\" />
-    <Folder Include="Views\Customers\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

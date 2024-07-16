@@ -8,129 +8,211 @@ const SalesModal = () => {
     const [products, setProducts] = useState([]);
     const [stores, setStores] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [dateSold, setDateSold] = useState('');
     const [customerId, setCustomerId] = useState('');
     const [productId, setProductId] = useState('');
     const [storeId, setStoreId] = useState('');
     const [currentSaleId, setCurrentSaleId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [saleToDelete, setSaleToDelete] = useState(null);
 
+    // Function to fetch initial data
+    const fetchData = async () => {
+        try {
+            const [salesResponse, customersResponse, productsResponse, storesResponse] = await Promise.all([
+                axios.get('https://localhost:7178/api/Sales'),
+                axios.get('https://localhost:7178/api/Customers'),
+                axios.get('https://localhost:7178/api/Products'),
+                axios.get('https://localhost:7178/api/Stores')
+            ]);
+
+            setSales(salesResponse.data);
+            setCustomers(customersResponse.data);
+            setProducts(productsResponse.data);
+            setStores(storesResponse.data);
+        } catch (error) {
+            console.error('Error fetching initial data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // useEffect to fetch data on component mount
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [salesResponse, customersResponse, productsResponse, storesResponse] = await Promise.all([
-                    axios.get('https://localhost:7178/api/Sales'),
-                    axios.get('https://localhost:7178/api/Customers'),
-                    axios.get('https://localhost:7178/api/Products'),
-                    axios.get('https://localhost:7178/api/Stores')
-                ]);
-
-                setSales(salesResponse.data);
-                setCustomers(customersResponse.data);
-                setProducts(productsResponse.data);
-                setStores(storesResponse.data);
-            } catch (error) {
-                console.error('Error fetching initial data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchData();
     }, []);
 
+    // Function to get customer name
     const getCustomerName = (customerId) => {
-        const customer = customers.find(cust => cust.id === customerId);
-        return customer ? customer.name : 'Unknown';
+        try {
+            const customer = customers.find(cust => cust.id === customerId);
+            return customer ? customer.name : 'Unknown';
+        } catch (error) {
+            console.error('Error getting customer name:', error);
+            return 'Unknown';
+        }
     };
 
+    // Function to get product name
     const getProductName = (productId) => {
-        const product = products.find(prod => prod.id === productId);
-        return product ? product.name : 'Unknown';
+        try {
+            const product = products.find(prod => prod.id === productId);
+            return product ? product.name : 'Unknown';
+        } catch (error) {
+            console.error('Error getting product name:', error);
+            return 'Unknown';
+        }
     };
 
+    // Function to get store name
     const getStoreName = (storeId) => {
-        const store = stores.find(sto => sto.id === storeId);
-        return store ? store.name : 'Unknown';
+        try {
+            const store = stores.find(sto => sto.id === storeId);
+            return store ? store.name : 'Unknown';
+        } catch (error) {
+            console.error('Error getting store name:', error);
+            return 'Unknown';
+        }
     };
 
+    // Handle change function for form inputs
     const handleChange = (e, { name, value }) => {
-        switch (name) {
-            case 'dateSold':
-                setDateSold(value);
-                break;
-            case 'customerId':
-                setCustomerId(value);
-                break;
-            case 'productId':
-                setProductId(value);
-                break;
-            case 'storeId':
-                setStoreId(value);
-                break;
-            default:
-                break;
+        try {
+            switch (name) {
+                case 'dateSold':
+                    setDateSold(value);
+                    break;
+                case 'customerId':
+                    setCustomerId(value);
+                    break;
+                case 'productId':
+                    setProductId(value);
+                    break;
+                case 'storeId':
+                    setStoreId(value);
+                    break;
+                default:
+                    break;
+            }
+        } catch (error) {
+            console.error('Error handling change:', error);
         }
     };
 
+    // Function to open modal for editing or creating a sale
     const handleOpen = (sale = null) => {
-        if (sale) {
-            const { id, dateSold, customer, product, store } = sale;
-            setModalOpen(true);
-            setCurrentSaleId(id);
-            setDateSold(dateSold);
-            setCustomerId(customer);
-            setProductId(product);
-            setStoreId(store);
-        } else {
-            setModalOpen(true);
-            setCurrentSaleId(null);
-            setDateSold('');
-            setCustomerId('');
-            setProductId('');
-            setStoreId('');
+        try {
+            if (sale) {
+                const { id, dateSold, customerId, productId, storeId } = sale;
+                setModalOpen(true);
+                setCurrentSaleId(id);
+                setDateSold(dateSold);
+                setCustomerId(customerId);
+                setProductId(productId);
+                setStoreId(storeId);
+            } else {
+                setModalOpen(true);
+                setCurrentSaleId(null);
+                setDateSold('');
+                setCustomerId('');
+                setProductId('');
+                setStoreId('');
+            }
+        } catch (error) {
+            console.error('Error opening modal:', error);
         }
     };
 
+    // Function to close modal
     const handleClose = () => {
-        setModalOpen(false);
+        try {
+            setModalOpen(false);
+        } catch (error) {
+            console.error('Error closing modal:', error);
+        }
     };
 
+    // Function to handle form submission (create or update sale)
     const handleSubmit = () => {
-        const saleData = { dateSold, customer: customerId, product: productId, store: storeId };
+        try {
+            const saleData = { dateSold, customerId, productId, storeId };
 
-        const request = currentSaleId
-            ? axios.put(`https://localhost:7178/api/Sales/${currentSaleId}`, saleData)
-            : axios.post('https://localhost:7178/api/Sales', saleData);
+            const request = currentSaleId
+                ? axios.put(`https://localhost:7178/api/Sales/${currentSaleId}`, saleData)
+                : axios.post('https://localhost:7178/api/Sales', saleData);
 
-        request
-            .then(response => {
-                setModalOpen(false);
-                refreshSalesData(); // Refresh sales data after submit
-            })
-            .catch(error => {
-                console.error('There was an error saving the sale!', error);
-            });
+            request
+                .then(response => {
+                    setModalOpen(false);
+                    refreshSalesData(); // Refresh sales data after submit
+                })
+                .catch(error => {
+                    console.error('There was an error saving the sale!', error);
+                });
+        } catch (error) {
+            console.error('Error handling submit:', error);
+        }
     };
 
-    const handleDelete = (id) => {
-        axios.delete(`https://localhost:7178/api/Sales/${id}`)
-            .then(response => {
-                refreshSalesData(); // Refresh sales data after delete
-            })
-            .catch(error => {
-                console.error('There was an error deleting the sale!', error);
-            });
+
+    // Function to handle sale deletion with confirmation modal
+    const confirmDelete = (sale) => {
+        setSaleToDelete(sale);
+        setDeleteModalOpen(true);
     };
 
+    const handleDelete = () => {
+        try {
+            axios.delete(`https://localhost:7178/api/Sales/${saleToDelete.id}`)
+                .then(response => {
+                    refreshSalesData(); // Refresh sales data after delete
+                    setDeleteModalOpen(false);
+                    setSaleToDelete(null);
+                })
+                .catch(error => {
+                    console.error('There was an error deleting the sale!', error);
+                });
+        } catch (error) {
+            console.error('Error handling delete:', error);
+        }
+    };
+
+    // Function to refresh sales data
     const refreshSalesData = () => {
-        axios.get('https://localhost:7178/api/Sales')
-            .then(response => {
-                setSales(response.data);
-            })
-            .catch(error => {
-                console.error('There was an error fetching the sales!', error);
-            });
+        try {
+            axios.get('https://localhost:7178/api/Sales')
+                .then(response => {
+                    setSales(response.data);
+                })
+                .catch(error => {
+                    console.error('There was an error fetching the sales!', error);
+                });
+        } catch (error) {
+            console.error('Error refreshing sales data:', error);
+        }
+    };
+
+    // Function to render sales rows in table
+    const renderSalesRows = () => {
+        return sales.map(sale => (
+            <Table.Row key={sale.id}>
+                <Table.Cell>{getCustomerName(sale.customerId)}</Table.Cell>
+                <Table.Cell>{getProductName(sale.productId)}</Table.Cell>
+                <Table.Cell>{getStoreName(sale.storeId)}</Table.Cell>
+                <Table.Cell>{sale.dateSold}</Table.Cell>
+                <Table.Cell>
+                    <Button color="yellow" onClick={() => handleOpen(sale)}>
+                        <Icon name="edit" /> Edit
+                    </Button>
+                </Table.Cell>
+                <Table.Cell>
+                    <Button color="red" onClick={() => confirmDelete(sale)}>
+                        <Icon name="delete" /> Delete
+                    </Button>
+                </Table.Cell>
+            </Table.Row>
+        ));
     };
 
     return (
@@ -153,24 +235,7 @@ const SalesModal = () => {
                             <Table.Cell colSpan={6} textAlign="center">Loading...</Table.Cell>
                         </Table.Row>
                     ) : (
-                        sales.map(sale => (
-                            <Table.Row key={sale.id}>
-                                <Table.Cell>{getCustomerName(sale.customer)}</Table.Cell>
-                                <Table.Cell>{getProductName(sale.product)}</Table.Cell>
-                                <Table.Cell>{getStoreName(sale.store)}</Table.Cell>
-                                <Table.Cell>{sale.dateSold}</Table.Cell>
-                                <Table.Cell>
-                                    <Button color="yellow" onClick={() => handleOpen(sale)}>
-                                        <Icon name="edit" /> Edit
-                                    </Button>
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Button color="red" onClick={() => handleDelete(sale.id)}>
-                                        <Icon name="delete" /> Delete
-                                    </Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))
+                        renderSalesRows()
                     )}
                 </Table.Body>
             </Table>
@@ -231,6 +296,25 @@ const SalesModal = () => {
                         labelPosition="right"
                         content={currentSaleId ? 'Save' : 'Create'}
                         onClick={handleSubmit}
+                    />
+                </Modal.Actions>
+            </Modal>
+
+            <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+                <Modal.Header>Confirm Delete</Modal.Header>
+                <Modal.Content>
+                    <p>Are you sure you want to delete this sale?</p>
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button color="black" onClick={() => setDeleteModalOpen(false)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        negative
+                        icon="delete"
+                        labelPosition="right"
+                        content="Delete"
+                        onClick={handleDelete}
                     />
                 </Modal.Actions>
             </Modal>

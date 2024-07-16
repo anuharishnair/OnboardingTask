@@ -18,10 +18,13 @@ class CustomerList extends React.Component {
         this.fetchCustomers();
     }
 
-    fetchCustomers = () => {
-        axios.get('https://localhost:7178/api/Customers').then((response) => {
+    fetchCustomers = async () => {
+        try {
+            const response = await axios.get('https://localhost:7178/api/Customers');
             this.setState({ customers: response.data });
-        });
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+        }
     };
 
     handleOpen = (isEditing = false, customer = null) => {
@@ -53,40 +56,35 @@ class CustomerList extends React.Component {
         this.setState({ [e.target.name]: e.target.value });
     };
 
-    handleSubmit = () => {
+    handleSubmit = async () => {
         const { name, address, isEditing, editCustomerId } = this.state;
         const customerData = { name, address };
 
-        if (isEditing) {
-            axios.put(`https://localhost:7178/api/Customers/${editCustomerId}`, customerData)
-                .then(() => {
-                    this.setState({
-                        modalOpen: false,
-                        isEditing: false,
-                        name: '',
-                        address: '',
-                        editCustomerId: null,
-                    }, () => {
-                        this.fetchCustomers(); // Fetch customers after state update
-                    });
-                })
-                .catch(error => {
-                    console.error('Error editing customer:', error);
+        try {
+            if (isEditing) {
+                await axios.put(`https://localhost:7178/api/Customers/${editCustomerId}`, customerData);
+                this.setState({
+                    modalOpen: false,
+                    isEditing: false,
+                    name: '',
+                    address: '',
+                    editCustomerId: null,
+                }, () => {
+                    this.fetchCustomers(); // Fetch customers after state update
                 });
-        } else {
-            axios.post('https://localhost:7178/api/Customers', customerData)
-                .then(() => {
-                    this.setState({
-                        modalOpen: false,
-                        name: '',
-                        address: '',
-                    }, () => {
-                        this.fetchCustomers(); // Fetch customers after state update
-                    });
-                })
-                .catch(error => {
-                    console.error('Error creating customer:', error);
+            } else {
+                const response = await axios.post('https://localhost:7178/api/Customers/CreateCustomerAsync', customerData);
+                console.log('Customer created successfully:', response.data);
+                this.setState({
+                    modalOpen: false,
+                    name: '',
+                    address: '',
+                }, () => {
+                    this.fetchCustomers(); // Fetch customers after state update
                 });
+            }
+        } catch (error) {
+            console.error('Error:', error);
         }
     };
 
@@ -94,24 +92,44 @@ class CustomerList extends React.Component {
         this.setState({ deleteConfirmationOpen: true, deleteCustomerId: id });
     };
 
-    confirmDelete = () => {
+    confirmDelete = async () => {
         const { deleteCustomerId } = this.state;
 
-        axios.delete(`https://localhost:7178/api/Customers/${deleteCustomerId}`)
-            .then(() => {
-                this.setState({
-                    deleteConfirmationOpen: false,
-                    deleteCustomerId: null,
-                });
-                this.fetchCustomers();
-            })
-            .catch(error => {
-                console.error('Error deleting customer:', error);
+        try {
+            await axios.delete(`https://localhost:7178/api/Customers/${deleteCustomerId}`);
+            this.setState({
+                deleteConfirmationOpen: false,
+                deleteCustomerId: null,
             });
+            this.fetchCustomers();
+        } catch (error) {
+            console.error('Error deleting customer:', error);
+        }
+    };
+
+    renderCustomerRows = () => {
+        const { customers } = this.state;
+
+        return customers.map((customer) => (
+            <Table.Row key={customer.id}>
+                <Table.Cell>{customer.name}</Table.Cell>
+                <Table.Cell>{customer.address}</Table.Cell>
+                <Table.Cell>
+                    <Button color="yellow" onClick={() => this.handleOpen(true, customer)}>
+                        <Icon name="edit" /> Edit
+                    </Button>
+                </Table.Cell>
+                <Table.Cell>
+                    <Button color="red" onClick={() => this.handleDelete(customer.id)}>
+                        <Icon name="delete" /> Delete
+                    </Button>
+                </Table.Cell>
+            </Table.Row>
+        ));
     };
 
     render() {
-        const { customers, name, address, modalOpen, isEditing, deleteConfirmationOpen } = this.state;
+        const { name, address, modalOpen, isEditing, deleteConfirmationOpen } = this.state;
 
         return (
             <div style={{ paddingTop: '100px', textAlign: 'left' }}>
@@ -165,22 +183,7 @@ class CustomerList extends React.Component {
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                        {customers.map((customer) => (
-                            <Table.Row key={customer.id}>
-                                <Table.Cell>{customer.name}</Table.Cell>
-                                <Table.Cell>{customer.address}</Table.Cell>
-                                <Table.Cell>
-                                    <Button color="yellow" onClick={() => this.handleOpen(true, customer)}>
-                                        <Icon name="edit" /> Edit
-                                    </Button>
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Button color="red" onClick={() => this.handleDelete(customer.id)}>
-                                        <Icon name="delete" /> Delete
-                                    </Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
+                        {this.renderCustomerRows()}
                     </Table.Body>
                 </Table>
             </div>

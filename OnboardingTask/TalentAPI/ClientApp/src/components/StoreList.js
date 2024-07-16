@@ -18,35 +18,50 @@ class StoreList extends React.Component {
         this.fetchStores();
     }
 
-    fetchStores = () => {
-        axios.get('https://localhost:7178/api/Stores').then((response) => {
+    fetchStores = async () => {
+        try {
+            const response = await axios.get('https://localhost:7178/api/Stores');
             this.setState({ stores: response.data });
-        });
+        } catch (error) {
+            console.error('Error fetching stores:', error);
+        }
     };
 
     handleStoreOpen = (isEditing = false, store = null) => {
-        if (isEditing && store) {
-            this.setState({
-                modalOpen: true,
-                isEditingStore: true,
-                editStoreId: store.id,
-                storeName: store.name,
-                storeAddress: store.address,
-            });
-        } else {
-            this.setState({ modalOpen: true });
+        try {
+            if (isEditing && store) {
+                this.setState({
+                    modalOpen: true,
+                    isEditingStore: true,
+                    editStoreId: store.id,
+                    storeName: store.name,
+                    storeAddress: store.address,
+                });
+            } else {
+                this.setState({ modalOpen: true });
+            }
+        } catch (error) {
+            console.error('Error opening store modal:', error);
         }
     };
 
     handleCloseStore = () => {
-        this.setState({ modalOpen: false, isEditingStore: false, storeName: '', storeAddress: '', editStoreId: null });
+        try {
+            this.setState({ modalOpen: false, isEditingStore: false, storeName: '', storeAddress: '', editStoreId: null });
+        } catch (error) {
+            console.error('Error closing store modal:', error);
+        }
     };
 
     handleStoreChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value });
+        try {
+            this.setState({ [e.target.name]: e.target.value });
+        } catch (error) {
+            console.error('Error handling store change:', error);
+        }
     };
 
-    handleStoreSubmit = () => {
+    handleStoreSubmit = async () => {
         const { storeName, storeAddress, isEditingStore, editStoreId } = this.state;
 
         const storeData = {
@@ -54,37 +69,66 @@ class StoreList extends React.Component {
             address: storeAddress,
         };
 
-        if (isEditingStore) {
-            axios.put(`https://localhost:7178/api/Stores/${editStoreId}`, storeData).then((response) => {
+        try {
+            if (isEditingStore) {
+                await axios.put(`https://localhost:7178/api/Stores/${editStoreId}`, storeData);
                 this.setState({ modalOpen: false, isEditingStore: false, storeName: '', storeAddress: '', editStoreId: null });
-                this.fetchStores();
-            });
-        } else {
-            axios.post('https://localhost:7178/api/Stores', storeData).then((response) => {
+            } else {
+                await axios.post('https://localhost:7178/api/Stores', storeData);
                 this.setState({ modalOpen: false, storeName: '', storeAddress: '' });
-                this.fetchStores();
-            });
+            }
+            this.fetchStores();
+        } catch (error) {
+            console.error('Error submitting store:', error);
         }
     };
 
     handleStoreDelete = (id) => {
-        this.setState({ deleteConfirmationOpen: true, deleteStoreId: id });
+        try {
+            this.setState({ deleteConfirmationOpen: true, deleteStoreId: id });
+        } catch (error) {
+            console.error('Error setting delete confirmation:', error);
+        }
     };
 
-    confirmStoreDelete = () => {
+    confirmStoreDelete = async () => {
         const { deleteStoreId } = this.state;
 
-        axios.delete(`https://localhost:7178/api/Stores/${deleteStoreId}`).then((response) => {
+        try {
+            await axios.delete(`https://localhost:7178/api/Stores/${deleteStoreId}`);
             this.setState({
                 deleteConfirmationOpen: false,
                 deleteStoreId: null,
             });
             this.fetchStores();
-        });
+        } catch (error) {
+            console.error('Error deleting store:', error);
+        }
+    };
+
+    renderStoreRows = () => {
+        const { stores } = this.state;
+
+        return stores.map((store) => (
+            <Table.Row key={store.id}>
+                <Table.Cell>{store.name}</Table.Cell>
+                <Table.Cell>{store.address}</Table.Cell>
+                <Table.Cell>
+                    <Button color="yellow" onClick={() => this.handleStoreOpen(true, store)}>
+                        <Icon name="edit" /> Edit
+                    </Button>
+                </Table.Cell>
+                <Table.Cell>
+                    <Button color="red" onClick={() => this.handleStoreDelete(store.id)}>
+                        <Icon name="delete" /> Delete
+                    </Button>
+                </Table.Cell>
+            </Table.Row>
+        ));
     };
 
     render() {
-        const { stores, storeName, storeAddress, modalOpen, isEditingStore, deleteConfirmationOpen } = this.state;
+        const { storeName, storeAddress, modalOpen, isEditingStore, deleteConfirmationOpen } = this.state;
 
         return (
             <div style={{ paddingTop: '100px', textAlign: 'left' }}>
@@ -144,22 +188,7 @@ class StoreList extends React.Component {
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                        {stores.map((store) => (
-                            <Table.Row key={store.id}>
-                                <Table.Cell>{store.name}</Table.Cell>
-                                <Table.Cell>{store.address}</Table.Cell>
-                                <Table.Cell>
-                                    <Button color="yellow" onClick={() => this.handleStoreOpen(true, store)}>
-                                        <Icon name="edit" /> Edit
-                                    </Button>
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Button color="red" onClick={() => this.handleStoreDelete(store.id)}>
-                                        <Icon name="delete" /> Delete
-                                    </Button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
+                        {this.renderStoreRows()}
                     </Table.Body>
                 </Table>
 

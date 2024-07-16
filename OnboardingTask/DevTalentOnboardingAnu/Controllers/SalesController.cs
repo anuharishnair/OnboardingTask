@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DevTalentOnboardingAnu.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using DevTalentOnboardingAnu.Models;
 
 namespace DevTalentOnboardingAnu.Controllers
 {
@@ -18,94 +19,142 @@ namespace DevTalentOnboardingAnu.Controllers
             _context = context;
         }
 
-        // GET: api/Sales
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Sale>>> GetSales()
+        // Create
+        [HttpPost]
+        public async Task<IActionResult> CreateSalesAsync([FromBody] SalesDto salesDto)
         {
-            return await _context.Sales
-                .Include(s => s.Customer)
-                .Include(s => s.Product)
-                .Include(s => s.Store)
-                .ToListAsync();
-        }
-
-        // GET: api/Sales/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Sale>> GetSale(int id)
-        {
-            var sale = await _context.Sales
-                .Include(s => s.Customer)
-                .Include(s => s.Product)
-                .Include(s => s.Store)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            if (sale == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest(ModelState);
             }
-
-            return sale;
-        }
-
-        // PUT: api/Sales/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSale(int id, Sale sale)
-        {
-            if (id != sale.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(sale).State = EntityState.Modified;
 
             try
             {
+                var sales = new Sales
+                {
+                    DateSold = salesDto.DateSold,
+                    CustomerId = salesDto.CustomerId,
+                    ProductId = salesDto.ProductId,
+                    StoreId = salesDto.StoreId
+                };
+
+                await _context.Sales.AddAsync(sales);
                 await _context.SaveChangesAsync();
+
+                return Ok("Sales Saved Successfully");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException ex)
             {
-                if (!SaleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while saving the sales: " + ex.Message);
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
 
-        // POST: api/Sales
-        [HttpPost]
-        public async Task<ActionResult<Sale>> PostSale(Sale sale)
+        // Read
+        [HttpGet]
+        public async Task<ActionResult<List<Sales>>> GetSalesAsync()
         {
-            _context.Sales.Add(sale);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSale", new { id = sale.Id }, sale);
+            try
+            {
+                var salesList = await _context.Sales
+                    .Include(s => s.Customer)
+                    .Include(s => s.Product)
+                    .Include(s => s.Store)
+                    .OrderByDescending(s => s.Id)
+                    .ToListAsync();
+                return Ok(salesList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
 
-        // DELETE: api/Sales/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Sales>> GetSalesByIdAsync([FromRoute] int id)
+        {
+            try
+            {
+                var sales = await _context.Sales
+                    .Include(s => s.Customer)
+                    .Include(s => s.Product)
+                    .Include(s => s.Store)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
+                if (sales == null)
+                {
+                    return NotFound("Sales is not found");
+                }
+
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
+        }
+
+        // Update
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSalesAsync([FromRoute] int id, [FromBody] SalesDto salesDto)
+        {
+            try
+            {
+                var sales = await _context.Sales.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (sales == null)
+                {
+                    return NotFound("Sales is not found");
+                }
+
+                sales.DateSold = salesDto.DateSold;
+                sales.CustomerId = salesDto.CustomerId;
+                sales.ProductId = salesDto.ProductId;
+                sales.StoreId = salesDto.StoreId;
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Sales Updated Successfully");
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while updating the sales: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
+        }
+
+        // Delete
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSale(int id)
+        public async Task<IActionResult> DeleteSalesAsync([FromRoute] int id)
         {
-            var sale = await _context.Sales.FindAsync(id);
-            if (sale == null)
+            try
             {
-                return NotFound();
+                var sales = await _context.Sales.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (sales == null)
+                {
+                    return NotFound("Sales is not found");
+                }
+
+                _context.Sales.Remove(sales);
+                await _context.SaveChangesAsync();
+
+                return Ok("Sales Deleted Successfully");
             }
-
-            _context.Sales.Remove(sale);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SaleExists(int id)
-        {
-            return _context.Sales.Any(e => e.Id == id);
+            catch (DbUpdateException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while deleting the sales: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
+            }
         }
     }
 }
