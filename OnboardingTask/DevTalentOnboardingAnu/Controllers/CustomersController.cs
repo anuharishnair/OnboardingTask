@@ -18,9 +18,8 @@ namespace DevTalentOnboardingAnu.Controllers
         {
             _context = context;
         }
-
+        // Create
         [HttpPost]
-        [Route("CreateCustomerAsync")]
         public async Task<IActionResult> CreateCustomerAsync([FromBody] CustomerDto request)
         {
             if (!ModelState.IsValid)

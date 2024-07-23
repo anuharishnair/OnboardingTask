@@ -14,14 +14,24 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
     {
-        builder.WithOrigins("https://localhost:44468")
+        builder.WithOrigins("https://localhost:44468", "https://talentfrontend-gnc3h4brgyfvdbfb.australiaeast-01.azurewebsites.net")
                .AllowAnyHeader()
                .AllowAnyMethod();
     });
 });
 
+string connectionString;
+if (builder.Environment.IsDevelopment())
+{
+    connectionString = builder.Configuration.GetConnectionString("LocalConnectionString");
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("AzureConnectionString");
+}
+
 builder.Services.AddDbContext<TalentDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 

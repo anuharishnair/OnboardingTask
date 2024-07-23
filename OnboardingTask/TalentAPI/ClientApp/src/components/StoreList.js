@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { Button, Modal, Form, Table, Icon } from 'semantic-ui-react';
+import { Button, Modal, Form, Table, Icon, Pagination } from 'semantic-ui-react';
 
 class StoreList extends React.Component {
     state = {
@@ -12,6 +12,9 @@ class StoreList extends React.Component {
         editStoreId: null,
         deleteConfirmationOpen: false,
         deleteStoreId: null,
+        selectedStoreId: null,
+        currentPage: 1,
+        storesPerPage: 8,
     };
 
     componentDidMount() {
@@ -21,110 +24,182 @@ class StoreList extends React.Component {
     fetchStores = async () => {
         try {
             const response = await axios.get('https://localhost:7178/api/Stores');
-            this.setState({ stores: response.data });
+            if (response.status >= 200 && response.status < 300) {
+                this.setState({ stores: response.data });
+            } else {
+                console.error('Unexpected response status:', response.status);
+            }
         } catch (error) {
             console.error('Error fetching stores:', error);
         }
     };
 
-    handleStoreOpen = (isEditing = false, store = null) => {
-        try {
-            if (isEditing && store) {
-                this.setState({
-                    modalOpen: true,
-                    isEditingStore: true,
-                    editStoreId: store.id,
-                    storeName: store.name,
-                    storeAddress: store.address,
-                });
-            } else {
-                this.setState({ modalOpen: true });
+    handleStoreOpen = async (isEditing = false, store = null) => {
+        if (isEditing && store) {
+            try {
+                const response = await axios.get(`https://localhost:7178/api/Stores/${store.id}`);
+                if (response.status >= 200 && response.status < 300) {
+                    const storeDetails = response.data;
+                    this.setState({
+                        modalOpen: true,
+                        isEditingStore: true,
+                        editStoreId: store.id,
+                        storeName: storeDetails.name,
+                        storeAddress: storeDetails.address,
+                        selectedStoreId: store.id,
+                    });
+                } else {
+                    console.error('Failed to fetch store details: Invalid response');
+                }
+            } catch (error) {
+                console.error('Error fetching store details:', error);
             }
-        } catch (error) {
-            console.error('Error opening store modal:', error);
+        } else {
+            this.setState({ modalOpen: true, isEditingStore: false, storeName: '', storeAddress: '', editStoreId: null });
         }
     };
 
     handleCloseStore = () => {
-        try {
-            this.setState({ modalOpen: false, isEditingStore: false, storeName: '', storeAddress: '', editStoreId: null });
-        } catch (error) {
-            console.error('Error closing store modal:', error);
-        }
+        this.setState({
+            modalOpen: false,
+            isEditingStore: false,
+            storeName: '',
+            storeAddress: '',
+            editStoreId: null,
+            deleteConfirmationOpen: false,
+        });
     };
 
     handleStoreChange = (e) => {
-        try {
-            this.setState({ [e.target.name]: e.target.value });
-        } catch (error) {
-            console.error('Error handling store change:', error);
-        }
+        this.setState({ [e.target.name]: e.target.value });
     };
 
     handleStoreSubmit = async () => {
         const { storeName, storeAddress, isEditingStore, editStoreId } = this.state;
-
-        const storeData = {
-            name: storeName,
-            address: storeAddress,
-        };
+        const storeData = { name: storeName, address: storeAddress };
 
         try {
             if (isEditingStore) {
-                await axios.put(`https://localhost:7178/api/Stores/${editStoreId}`, storeData);
-                this.setState({ modalOpen: false, isEditingStore: false, storeName: '', storeAddress: '', editStoreId: null });
+                if (editStoreId) {
+                    const response = await axios.put(`https://localhost:7178/api/Stores/${editStoreId}`, storeData);
+                    if (response.status >= 200 && response.status < 300) {
+                        this.handleCloseStore();
+                        this.fetchStores(); // Refresh store data after submit
+                    } else {
+                        console.error('Failed to update store: Invalid response');
+                    }
+                } else {
+                    console.error('No store ID provided for editing.');
+                }
             } else {
-                await axios.post('https://localhost:7178/api/Stores', storeData);
-                this.setState({ modalOpen: false, storeName: '', storeAddress: '' });
+                const response = await axios.post('https://localhost:7178/api/Stores', storeData);
+                if (response.status >= 200 && response.status < 300) {
+                    this.handleCloseStore();
+                    this.fetchStores(); // Refresh store data after submit
+                } else {
+                    console.error('Failed to create store: Invalid response');
+                }
             }
-            this.fetchStores();
         } catch (error) {
             console.error('Error submitting store:', error);
         }
     };
 
     handleStoreDelete = (id) => {
-        try {
-            this.setState({ deleteConfirmationOpen: true, deleteStoreId: id });
-        } catch (error) {
-            console.error('Error setting delete confirmation:', error);
-        }
+        this.setState({ deleteConfirmationOpen: true, deleteStoreId: id });
     };
 
     confirmStoreDelete = async () => {
         const { deleteStoreId } = this.state;
 
-        try {
-            await axios.delete(`https://localhost:7178/api/Stores/${deleteStoreId}`);
-            this.setState({
-                deleteConfirmationOpen: false,
-                deleteStoreId: null,
-            });
-            this.fetchStores();
-        } catch (error) {
-            console.error('Error deleting store:', error);
+        if (deleteStoreId) {
+            try {
+                const response = await axios.delete(`https://localhost:7178/api/Stores/${deleteStoreId}`);
+                if (response.status >= 200 && response.status < 300) {
+                    this.setState({ deleteConfirmationOpen: false, deleteStoreId: null });
+                    this.fetchStores(); // Refresh store data after delete
+                } else {
+                    console.error('Failed to delete store: Invalid response');
+                }
+            } catch (error) {
+                console.error('Error deleting store:', error);
+            }
+        } else {
+            console.error('No store ID provided for deletion.');
         }
     };
 
-    renderStoreRows = () => {
-        const { stores } = this.state;
+    handleRowClick = async (storeId) => {
+        try {
+            const response = await axios.get(`https://localhost:7178/api/Stores/${storeId}`);
+            if (response.status >= 200 && response.status < 300) {
+                const storeDetails = response.data;
+                this.setState({
+                    selectedStoreId: storeId,
+                    storeName: storeDetails.name,
+                    storeAddress: storeDetails.address,
+                });
+            } else {
+                console.error('Failed to fetch store details: Invalid response');
+            }
+        } catch (error) {
+            console.error('Error fetching store details:', error);
+        }
+    };
 
-        return stores.map((store) => (
-            <Table.Row key={store.id}>
-                <Table.Cell>{store.name}</Table.Cell>
-                <Table.Cell>{store.address}</Table.Cell>
-                <Table.Cell>
-                    <Button color="yellow" onClick={() => this.handleStoreOpen(true, store)}>
-                        <Icon name="edit" /> Edit
-                    </Button>
-                </Table.Cell>
-                <Table.Cell>
-                    <Button color="red" onClick={() => this.handleStoreDelete(store.id)}>
-                        <Icon name="delete" /> Delete
-                    </Button>
-                </Table.Cell>
-            </Table.Row>
-        ));
+    handlePageChange = (e, { activePage }) => {
+        this.setState({ currentPage: activePage });
+    };
+
+    renderStoreRows = () => {
+        const { stores, selectedStoreId, currentPage, storesPerPage } = this.state;
+        const indexOfLastStore = currentPage * storesPerPage;
+        const indexOfFirstStore = indexOfLastStore - storesPerPage;
+        const currentStores = stores.slice(indexOfFirstStore, indexOfLastStore);
+
+        if (Array.isArray(currentStores) && currentStores.length > 0) {
+            return currentStores.map((store) => (
+                <Table.Row
+                    key={store.id}
+                    active={selectedStoreId === store.id}
+                    onClick={() => this.handleRowClick(store.id)}
+                >
+                    <Table.Cell>{store.name}</Table.Cell>
+                    <Table.Cell>{store.address}</Table.Cell>
+                    <Table.Cell>
+                        <Button color="yellow" onClick={() => this.handleStoreOpen(true, store)}>
+                            <Icon name="edit" /> Edit
+                        </Button>
+                    </Table.Cell>
+                    <Table.Cell>
+                        <Button color="red" onClick={() => this.handleStoreDelete(store.id)}>
+                            <Icon name="delete" /> Delete
+                        </Button>
+                    </Table.Cell>
+                </Table.Row>
+            ));
+        } else {
+            return (
+                <Table.Row>
+                    <Table.Cell colSpan="4" textAlign="center">No stores available</Table.Cell>
+                </Table.Row>
+            );
+        }
+    };
+
+    renderPagination = () => {
+        const { stores, currentPage, storesPerPage } = this.state;
+        const totalPages = Math.ceil(stores.length / storesPerPage);
+
+        if (totalPages > 1) {
+            return (
+                <Pagination
+                    activePage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={this.handlePageChange}
+                />
+            );
+        }
     };
 
     render() {
@@ -192,6 +267,8 @@ class StoreList extends React.Component {
                     </Table.Body>
                 </Table>
 
+                {/* Pagination */}
+                {this.renderPagination()}
             </div>
         );
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Table, Icon } from 'semantic-ui-react';
+import { Modal, Button, Form, Table, Icon, Pagination } from 'semantic-ui-react';
 import axios from 'axios';
 
 const SalesModal = () => {
@@ -17,9 +17,14 @@ const SalesModal = () => {
     const [loading, setLoading] = useState(true);
     const [saleToDelete, setSaleToDelete] = useState(null);
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [salesPerPage] = useState(8);
+
     // Function to fetch initial data
     const fetchData = async () => {
         try {
+            // Make API requests concurrently
             const [salesResponse, customersResponse, productsResponse, storesResponse] = await Promise.all([
                 axios.get('https://localhost:7178/api/Sales'),
                 axios.get('https://localhost:7178/api/Customers'),
@@ -27,10 +32,20 @@ const SalesModal = () => {
                 axios.get('https://localhost:7178/api/Stores')
             ]);
 
-            setSales(salesResponse.data);
-            setCustomers(customersResponse.data);
-            setProducts(productsResponse.data);
-            setStores(storesResponse.data);
+            // Validate responses
+            if (Array.isArray(salesResponse.data) &&
+                Array.isArray(customersResponse.data) &&
+                Array.isArray(productsResponse.data) &&
+                Array.isArray(storesResponse.data)) {
+
+                // Update states with validated data
+                setSales(salesResponse.data);
+                setCustomers(customersResponse.data);
+                setProducts(productsResponse.data);
+                setStores(storesResponse.data);
+            } else {
+                throw new Error('Invalid data format received from one or more APIs');
+            }
         } catch (error) {
             console.error('Error fetching initial data:', error);
         } finally {
@@ -38,14 +53,31 @@ const SalesModal = () => {
         }
     };
 
+
     // useEffect to fetch data on component mount
     useEffect(() => {
         fetchData();
     }, []);
 
+    // Pagination logic
+    const indexOfLastSale = currentPage * salesPerPage;
+    const indexOfFirstSale = indexOfLastSale - salesPerPage;
+    const currentSales = sales.slice(indexOfFirstSale, indexOfLastSale);
+    const totalPages = Math.ceil(sales.length / salesPerPage);
+
+    // Function to handle page change
+    const handlePageChange = (e, { activePage }) => {
+        setCurrentPage(activePage);
+    };
+
     // Function to get customer name
     const getCustomerName = (customerId) => {
         try {
+            if (!customerId) {
+                // If customerId is not provided, return 'Unknown'
+                return 'Unknown';
+            }
+
             const customer = customers.find(cust => cust.id === customerId);
             return customer ? customer.name : 'Unknown';
         } catch (error) {
@@ -57,6 +89,11 @@ const SalesModal = () => {
     // Function to get product name
     const getProductName = (productId) => {
         try {
+            if (!productId) {
+                // If productId is not provided, return 'Unknown'
+                return 'Unknown';
+            }
+
             const product = products.find(prod => prod.id === productId);
             return product ? product.name : 'Unknown';
         } catch (error) {
@@ -68,6 +105,11 @@ const SalesModal = () => {
     // Function to get store name
     const getStoreName = (storeId) => {
         try {
+            if (!storeId) {
+                // If storeId is not provided, return 'Unknown'
+                return 'Unknown';
+            }
+
             const store = stores.find(sto => sto.id === storeId);
             return store ? store.name : 'Unknown';
         } catch (error) {
@@ -75,6 +117,7 @@ const SalesModal = () => {
             return 'Unknown';
         }
     };
+
 
     // Handle change function for form inputs
     const handleChange = (e, { name, value }) => {
@@ -155,7 +198,6 @@ const SalesModal = () => {
         }
     };
 
-
     // Function to handle sale deletion with confirmation modal
     const confirmDelete = (sale) => {
         setSaleToDelete(sale);
@@ -164,11 +206,21 @@ const SalesModal = () => {
 
     const handleDelete = () => {
         try {
+            if (!saleToDelete || !saleToDelete.id) {
+                console.error('Error: saleToDelete is not defined or saleToDelete.id is missing');
+                return;
+            }
+
             axios.delete(`https://localhost:7178/api/Sales/${saleToDelete.id}`)
                 .then(response => {
-                    refreshSalesData(); // Refresh sales data after delete
-                    setDeleteModalOpen(false);
-                    setSaleToDelete(null);
+                    // Check if response status is 200 OK
+                    if (response.status === 200) {
+                        refreshSalesData(); // Refresh sales data after delete
+                        setDeleteModalOpen(false);
+                        setSaleToDelete(null);
+                    } else {
+                        console.error('Error: Unexpected response status', response.status);
+                    }
                 })
                 .catch(error => {
                     console.error('There was an error deleting the sale!', error);
@@ -178,12 +230,18 @@ const SalesModal = () => {
         }
     };
 
+
     // Function to refresh sales data
     const refreshSalesData = () => {
         try {
             axios.get('https://localhost:7178/api/Sales')
                 .then(response => {
-                    setSales(response.data);
+                    // Check if response status is 200 OK
+                    if (response.status === 200) {
+                        setSales(response.data);
+                    } else {
+                        console.error('Error: Unexpected response status', response.status);
+                    }
                 })
                 .catch(error => {
                     console.error('There was an error fetching the sales!', error);
@@ -193,9 +251,15 @@ const SalesModal = () => {
         }
     };
 
+
     // Function to render sales rows in table
     const renderSalesRows = () => {
-        return sales.map(sale => (
+        if (!Array.isArray(currentSales)) {
+            console.error('Error: currentSales is not an array');
+            return null;
+        }
+
+        return currentSales.map(sale => (
             <Table.Row key={sale.id}>
                 <Table.Cell>{getCustomerName(sale.customerId)}</Table.Cell>
                 <Table.Cell>{getProductName(sale.productId)}</Table.Cell>
@@ -214,6 +278,7 @@ const SalesModal = () => {
             </Table.Row>
         ));
     };
+
 
     return (
         <div style={{ paddingTop: '100px', textAlign: 'left' }}>
@@ -239,6 +304,14 @@ const SalesModal = () => {
                     )}
                 </Table.Body>
             </Table>
+
+            {totalPages > 1 && (
+                <Pagination
+                    activePage={currentPage}
+                    onPageChange={handlePageChange}
+                    totalPages={totalPages}
+                />
+            )}
 
             <Modal open={modalOpen} onClose={handleClose}>
                 <Modal.Header>{currentSaleId ? 'Edit Sale' : 'Create Sale'}</Modal.Header>

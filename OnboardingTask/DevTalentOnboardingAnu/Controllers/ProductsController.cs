@@ -21,7 +21,7 @@ namespace DevTalentOnboardingAnu.Controllers
 
         // Create
         [HttpPost]
-        public async Task<IActionResult> CreateProductAsync([FromBody] ProductDto productDto)
+        public async Task<IActionResult> CreateProductAsync([FromBody] ProductDto request)
         {
             if (!ModelState.IsValid)
             {
@@ -32,8 +32,8 @@ namespace DevTalentOnboardingAnu.Controllers
             {
                 var product = new Product
                 {
-                    Name = productDto.Name,
-                    Price = productDto.Price,
+                    Name = request.Name,
+                    Price = request.Price,
                     ProductSold = new List<Sales>() // Initialize the navigation property if necessary
                 };
 
@@ -89,7 +89,7 @@ namespace DevTalentOnboardingAnu.Controllers
 
         // Update
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProductAsync([FromRoute] int id, [FromBody] ProductDto productDto)
+        public async Task<IActionResult> UpdateProductAsync([FromRoute] int id, [FromBody] ProductDto request)
         {
             try
             {
@@ -100,8 +100,8 @@ namespace DevTalentOnboardingAnu.Controllers
                     return NotFound("Product is not found");
                 }
 
-                product.Name = productDto.Name;
-                product.Price = productDto.Price;
+                product.Name = request.Name;
+                product.Price = request.Price;
 
                 await _context.SaveChangesAsync();
 
