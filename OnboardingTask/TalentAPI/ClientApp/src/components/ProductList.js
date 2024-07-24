@@ -210,8 +210,6 @@ class ProductList extends React.Component {
                 <Button primary onClick={() => this.handleOpen(false)}>
                     New Product
                 </Button>
-
-                {/* Product Modal */}
                 <Modal open={modalOpen} onClose={this.handleClose}>
                     <Modal.Header>{isEditingProduct ? 'Edit Product' : 'Create Product'}</Modal.Header>
                     <Modal.Content>
@@ -240,7 +238,6 @@ class ProductList extends React.Component {
                     </Modal.Content>
                 </Modal>
 
-                {/* Delete Confirmation Modal */}
                 <Modal open={deleteConfirmationOpen} onClose={() => this.setState({ deleteConfirmationOpen: false })}>
                     <Modal.Header>Delete Product</Modal.Header>
                     <Modal.Content>
@@ -252,7 +249,6 @@ class ProductList extends React.Component {
                     </Modal.Actions>
                 </Modal>
 
-                {/* Product Table */}
                 <Table celled style={{ marginTop: '20px' }}>
                     <Table.Header>
                         <Table.Row>
@@ -267,7 +263,6 @@ class ProductList extends React.Component {
                     </Table.Body>
                 </Table>
 
-                {/* Pagination */}
                 {this.renderPagination()}
             </div>
         );

@@ -1,18 +1,12 @@
 ﻿<Properties StartupConfiguration="{1D532C19-744D-4713-A0B6-B0C593BD60BF}|https">
-  <MonoDevelop.Ide.ItemProperties.DevTalentOnboardingAnu PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
-  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.DevTalentOnboardingAnu PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workbench ActiveDocument="../TalentAPI/ClientApp/src/components/SalesModal.js">
     <Files>
       <File FileName="Program.cs" Line="21" Column="4" />
-      <File FileName="../TalentAPI/ClientApp/src/components/CustomerList.js" Line="191" Column="53" />
-      <File FileName="../TalentAPI/ClientApp/src/components/ProductList.js" Line="278" Column="1" />
-      <File FileName="../TalentAPI/ClientApp/src/components/StoreList.js" Line="278" Column="1" />
-      <File FileName="../TalentAPI/ClientApp/src/components/SalesModal.js" Line="281" Column="1" />
+      <File FileName="../TalentAPI/ClientApp/src/components/SalesModal.js" Line="231" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -20,27 +14,9 @@
           <Node name="DevTalentOnboardingAnu" expanded="True">
             <Node name="DevTalentOnboardingAnu">
               <Node name="Controllers" expanded="True" />
-              <Node name="Migrations" expanded="True">
-                <Node name="20240716104956_TalentDb.cs" expanded="True" />
-              </Node>
-              <Node name="Models" expanded="True" />
-              <Node name="Properties" expanded="True" />
-              <Node name="wwwroot" expanded="True">
-                <Node name="lib" expanded="True">
-                  <Node name="bootstrap" expanded="True">
-                    <Node name="dist" expanded="True">
-                      <Node name="js" expanded="True">
-                        <Node name="bootstrap.js" expanded="True">
-                          <Node name="bootstrap.bundle.js" expanded="True" />
-                        </Node>
-                      </Node>
-                    </Node>
-                  </Node>
-                </Node>
-              </Node>
             </Node>
             <Node name="TalentAPI">
-              <Node name="ClientApp">
+              <Node name="ClientApp" expanded="True">
                 <Node name="src" expanded="True">
                   <Node name="components" expanded="True">
                     <Node name="SalesModal.js" selected="True" />
@@ -53,4 +29,7 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
 </Properties>

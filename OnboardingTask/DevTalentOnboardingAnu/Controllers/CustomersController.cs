@@ -65,10 +65,14 @@ namespace DevTalentOnboardingAnu.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
             }
         }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomerByIdAsync([FromRoute] long id)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid customer ID");
+            }
+
             try
             {
                 var customer = await _context.Customers.FirstOrDefaultAsync(p => p.Id == id);
@@ -90,6 +94,11 @@ namespace DevTalentOnboardingAnu.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCustomerAsync([FromRoute] long id, [FromBody] CustomerDto request)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid customer ID");
+            }
+
             try
             {
                 var customer = await _context.Customers.FirstOrDefaultAsync(p => p.Id == id);
@@ -120,6 +129,11 @@ namespace DevTalentOnboardingAnu.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomerAsync([FromRoute] long id)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid customer ID");
+            }
+
             try
             {
                 var customer = await _context.Customers.FirstOrDefaultAsync(p => p.Id == id);

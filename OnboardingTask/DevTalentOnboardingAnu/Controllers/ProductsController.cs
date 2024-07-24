@@ -70,6 +70,11 @@ namespace DevTalentOnboardingAnu.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProductByIdAsync([FromRoute] int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid product ID");
+            }
+
             try
             {
                 var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
@@ -91,6 +96,11 @@ namespace DevTalentOnboardingAnu.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProductAsync([FromRoute] int id, [FromBody] ProductDto request)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid product ID");
+            }
+
             try
             {
                 var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
@@ -121,6 +131,11 @@ namespace DevTalentOnboardingAnu.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProductAsync([FromRoute] int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid product ID");
+            }
+
             try
             {
                 var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
@@ -144,5 +159,6 @@ namespace DevTalentOnboardingAnu.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred: " + ex.Message);
             }
         }
+
     }
 }

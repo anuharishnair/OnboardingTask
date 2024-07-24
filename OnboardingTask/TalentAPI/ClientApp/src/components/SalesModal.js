@@ -17,21 +17,17 @@ const SalesModal = () => {
     const [loading, setLoading] = useState(true);
     const [saleToDelete, setSaleToDelete] = useState(null);
 
-    // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [salesPerPage] = useState(8);
 
-    // Function to fetch initial data
     const fetchData = async () => {
         try {
-            // Make API requests concurrently
             const [salesResponse, customersResponse, productsResponse, storesResponse] = await Promise.all([
                 axios.get('https://localhost:7178/api/Sales'),
                 axios.get('https://localhost:7178/api/Customers'),
                 axios.get('https://localhost:7178/api/Products'),
                 axios.get('https://localhost:7178/api/Stores')
             ]);
-
             // Validate responses
             if (Array.isArray(salesResponse.data) &&
                 Array.isArray(customersResponse.data) &&
@@ -53,28 +49,24 @@ const SalesModal = () => {
         }
     };
 
-
-    // useEffect to fetch data on component mount
     useEffect(() => {
         fetchData();
     }, []);
 
-    // Pagination logic
     const indexOfLastSale = currentPage * salesPerPage;
     const indexOfFirstSale = indexOfLastSale - salesPerPage;
     const currentSales = sales.slice(indexOfFirstSale, indexOfLastSale);
     const totalPages = Math.ceil(sales.length / salesPerPage);
 
-    // Function to handle page change
+
     const handlePageChange = (e, { activePage }) => {
         setCurrentPage(activePage);
     };
 
-    // Function to get customer name
     const getCustomerName = (customerId) => {
         try {
             if (!customerId) {
-                // If customerId is not provided, return 'Unknown'
+         
                 return 'Unknown';
             }
 
@@ -86,11 +78,9 @@ const SalesModal = () => {
         }
     };
 
-    // Function to get product name
     const getProductName = (productId) => {
         try {
             if (!productId) {
-                // If productId is not provided, return 'Unknown'
                 return 'Unknown';
             }
 
@@ -102,11 +92,9 @@ const SalesModal = () => {
         }
     };
 
-    // Function to get store name
     const getStoreName = (storeId) => {
         try {
             if (!storeId) {
-                // If storeId is not provided, return 'Unknown'
                 return 'Unknown';
             }
 
@@ -118,8 +106,6 @@ const SalesModal = () => {
         }
     };
 
-
-    // Handle change function for form inputs
     const handleChange = (e, { name, value }) => {
         try {
             switch (name) {
@@ -143,7 +129,6 @@ const SalesModal = () => {
         }
     };
 
-    // Function to open modal for editing or creating a sale
     const handleOpen = (sale = null) => {
         try {
             if (sale) {
@@ -167,7 +152,6 @@ const SalesModal = () => {
         }
     };
 
-    // Function to close modal
     const handleClose = () => {
         try {
             setModalOpen(false);
@@ -176,7 +160,6 @@ const SalesModal = () => {
         }
     };
 
-    // Function to handle form submission (create or update sale)
     const handleSubmit = () => {
         try {
             const saleData = { dateSold, customerId, productId, storeId };
@@ -188,7 +171,7 @@ const SalesModal = () => {
             request
                 .then(response => {
                     setModalOpen(false);
-                    refreshSalesData(); // Refresh sales data after submit
+                    refreshSalesData(); 
                 })
                 .catch(error => {
                     console.error('There was an error saving the sale!', error);
@@ -198,7 +181,6 @@ const SalesModal = () => {
         }
     };
 
-    // Function to handle sale deletion with confirmation modal
     const confirmDelete = (sale) => {
         setSaleToDelete(sale);
         setDeleteModalOpen(true);
@@ -213,9 +195,8 @@ const SalesModal = () => {
 
             axios.delete(`https://localhost:7178/api/Sales/${saleToDelete.id}`)
                 .then(response => {
-                    // Check if response status is 200 OK
                     if (response.status === 200) {
-                        refreshSalesData(); // Refresh sales data after delete
+                        refreshSalesData(); 
                         setDeleteModalOpen(false);
                         setSaleToDelete(null);
                     } else {
@@ -230,13 +211,10 @@ const SalesModal = () => {
         }
     };
 
-
-    // Function to refresh sales data
     const refreshSalesData = () => {
         try {
             axios.get('https://localhost:7178/api/Sales')
                 .then(response => {
-                    // Check if response status is 200 OK
                     if (response.status === 200) {
                         setSales(response.data);
                     } else {
@@ -251,8 +229,6 @@ const SalesModal = () => {
         }
     };
 
-
-    // Function to render sales rows in table
     const renderSalesRows = () => {
         if (!Array.isArray(currentSales)) {
             console.error('Error: currentSales is not an array');
