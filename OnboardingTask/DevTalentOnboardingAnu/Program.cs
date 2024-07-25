@@ -1,6 +1,5 @@
 ﻿using DevTalentOnboardingAnu.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,13 +7,19 @@ using Microsoft.Extensions.Hosting;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
-
-
+// Configure CORS policies
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
     {
-        builder.WithOrigins("https://localhost:44468", "https://talentfrontend-gnc3h4brgyfvdbfb.australiaeast-01.azurewebsites.net")
+        builder.WithOrigins("https://localhost:44468")
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+
+    options.AddPolicy("AllowProductionOrigins", builder =>
+    {
+        builder.WithOrigins("https://talentfrontend-gnc3h4brgyfvdbfb.australiaeast-01.azurewebsites.net")
                .AllowAnyHeader()
                .AllowAnyMethod();
     });
@@ -39,18 +44,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseCors("AllowLocalhost"); // For development
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error"); // Generic error handling in production
+    app.UseHsts(); // HTTP Strict Transport Security
+    app.UseCors("AllowProductionOrigins"); // For production
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
-app.UseCors("AllowLocalhost");
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
-
-

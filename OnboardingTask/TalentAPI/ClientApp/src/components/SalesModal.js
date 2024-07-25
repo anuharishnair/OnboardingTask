@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Table, Icon, Pagination } from 'semantic-ui-react';
 import axios from 'axios';
+import { apiUrl } from '../config'; // Adjust the path if necessary
 
 const SalesModal = () => {
     const [sales, setSales] = useState([]);
@@ -23,10 +24,10 @@ const SalesModal = () => {
     const fetchData = async () => {
         try {
             const [salesResponse, customersResponse, productsResponse, storesResponse] = await Promise.all([
-                axios.get('https://localhost:7178/api/Sales'),
-                axios.get('https://localhost:7178/api/Customers'),
-                axios.get('https://localhost:7178/api/Products'),
-                axios.get('https://localhost:7178/api/Stores')
+                axios.get(`${apiUrl}/api/sales`),
+                axios.get(`${apiUrl}/api/customers`),
+                axios.get(`${apiUrl}/api/products`),
+                axios.get(`${apiUrl}/api/stores`)
             ]);
             // Validate responses
             if (Array.isArray(salesResponse.data) &&
@@ -58,7 +59,6 @@ const SalesModal = () => {
     const currentSales = sales.slice(indexOfFirstSale, indexOfLastSale);
     const totalPages = Math.ceil(sales.length / salesPerPage);
 
-
     const handlePageChange = (e, { activePage }) => {
         setCurrentPage(activePage);
     };
@@ -66,7 +66,6 @@ const SalesModal = () => {
     const getCustomerName = (customerId) => {
         try {
             if (!customerId) {
-         
                 return 'Unknown';
             }
 
@@ -165,13 +164,13 @@ const SalesModal = () => {
             const saleData = { dateSold, customerId, productId, storeId };
 
             const request = currentSaleId
-                ? axios.put(`https://localhost:7178/api/Sales/${currentSaleId}`, saleData)
-                : axios.post('https://localhost:7178/api/Sales', saleData);
+                ? axios.put(`${apiUrl}/api/sales/${currentSaleId}`, saleData)
+                : axios.post(`${apiUrl}/api/sales`, saleData);
 
             request
                 .then(response => {
                     setModalOpen(false);
-                    refreshSalesData(); 
+                    refreshSalesData();
                 })
                 .catch(error => {
                     console.error('There was an error saving the sale!', error);
@@ -193,10 +192,10 @@ const SalesModal = () => {
                 return;
             }
 
-            axios.delete(`https://localhost:7178/api/Sales/${saleToDelete.id}`)
+            axios.delete(`${apiUrl}/api/sales/${saleToDelete.id}`)
                 .then(response => {
                     if (response.status === 200) {
-                        refreshSalesData(); 
+                        refreshSalesData();
                         setDeleteModalOpen(false);
                         setSaleToDelete(null);
                     } else {
@@ -213,7 +212,7 @@ const SalesModal = () => {
 
     const refreshSalesData = () => {
         try {
-            axios.get('https://localhost:7178/api/Sales')
+            axios.get(`${apiUrl}/api/sales`)
                 .then(response => {
                     if (response.status === 200) {
                         setSales(response.data);
@@ -254,7 +253,6 @@ const SalesModal = () => {
             </Table.Row>
         ));
     };
-
 
     return (
         <div style={{ paddingTop: '100px', textAlign: 'left' }}>

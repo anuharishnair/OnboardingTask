@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { Button, Modal, Form, Table, Icon, Pagination } from 'semantic-ui-react';
+import { apiUrl } from '../config'; 
 
 class ProductList extends React.Component {
     state = {
@@ -23,7 +24,7 @@ class ProductList extends React.Component {
 
     fetchProducts = async () => {
         try {
-            const response = await axios.get('https://localhost:7178/api/Products');
+            const response = await axios.get(`${apiUrl}/api/products`);
             if (response.status >= 200 && response.status < 300) {
                 this.setState({ products: response.data });
             } else {
@@ -37,7 +38,7 @@ class ProductList extends React.Component {
     handleOpen = async (isEditing = false, product = null) => {
         if (isEditing && product) {
             try {
-                const response = await axios.get(`https://localhost:7178/api/Products/${product.id}`);
+                const response = await axios.get(`${apiUrl}/api/products/${product.id}`);
                 if (response.status >= 200 && response.status < 300) {
                     const productDetails = response.data;
                     this.setState({
@@ -81,7 +82,7 @@ class ProductList extends React.Component {
         try {
             if (isEditingProduct) {
                 if (editProductId) {
-                    const response = await axios.put(`https://localhost:7178/api/Products/${editProductId}`, productData);
+                    const response = await axios.put(`${apiUrl}/api/products/${editProductId}`, productData);
                     if (response.status >= 200 && response.status < 300) {
                         this.handleClose();
                         this.fetchProducts(); // Refresh data
@@ -92,7 +93,7 @@ class ProductList extends React.Component {
                     console.error('No product ID provided for update');
                 }
             } else {
-                const response = await axios.post('https://localhost:7178/api/Products', productData);
+                const response = await axios.post(`${apiUrl}/api/products`, productData);
                 if (response.status >= 200 && response.status < 300) {
                     this.handleClose();
                     this.fetchProducts(); // Refresh data
@@ -114,7 +115,7 @@ class ProductList extends React.Component {
 
         if (deleteProductId) {
             try {
-                const response = await axios.delete(`https://localhost:7178/api/Products/${deleteProductId}`);
+                const response = await axios.delete(`${apiUrl}/api/products/${deleteProductId}`);
                 if (response.status >= 200 && response.status < 300) {
                     this.setState({ deleteConfirmationOpen: false, deleteProductId: null });
                     this.fetchProducts(); // Refresh data
@@ -131,7 +132,7 @@ class ProductList extends React.Component {
 
     handleRowClick = async (productId) => {
         try {
-            const response = await axios.get(`https://localhost:7178/api/Products/${productId}`);
+            const response = await axios.get(`${apiUrl}/api/products/${productId}`);
             if (response.status >= 200 && response.status < 300) {
                 const productDetails = response.data;
                 this.setState({

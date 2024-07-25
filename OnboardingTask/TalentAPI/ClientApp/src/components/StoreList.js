@@ -2,6 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import { Button, Modal, Form, Table, Icon, Pagination } from 'semantic-ui-react';
 
+const apiUrl = process.env.REACT_APP_API_URL || 'https://talentapp-bzfjg2htcwgtfzf7.australiaeast-01.azurewebsites.net';
+
 class StoreList extends React.Component {
     state = {
         stores: [],
@@ -23,7 +25,7 @@ class StoreList extends React.Component {
 
     fetchStores = async () => {
         try {
-            const response = await axios.get('https://localhost:7178/api/Stores');
+            const response = await axios.get(`${apiUrl}/api/stores`);
             if (response.status >= 200 && response.status < 300) {
                 this.setState({ stores: response.data });
             } else {
@@ -37,7 +39,7 @@ class StoreList extends React.Component {
     handleStoreOpen = async (isEditing = false, store = null) => {
         if (isEditing && store) {
             try {
-                const response = await axios.get(`https://localhost:7178/api/Stores/${store.id}`);
+                const response = await axios.get(`${apiUrl}/api/stores/${store.id}`);
                 if (response.status >= 200 && response.status < 300) {
                     const storeDetails = response.data;
                     this.setState({
@@ -81,7 +83,7 @@ class StoreList extends React.Component {
         try {
             if (isEditingStore) {
                 if (editStoreId) {
-                    const response = await axios.put(`https://localhost:7178/api/Stores/${editStoreId}`, storeData);
+                    const response = await axios.put(`${apiUrl}/api/stores/${editStoreId}`, storeData);
                     if (response.status >= 200 && response.status < 300) {
                         this.handleCloseStore();
                         this.fetchStores(); // Refresh store data after submit
@@ -92,7 +94,7 @@ class StoreList extends React.Component {
                     console.error('No store ID provided for editing.');
                 }
             } else {
-                const response = await axios.post('https://localhost:7178/api/Stores', storeData);
+                const response = await axios.post(`${apiUrl}/api/stores`, storeData);
                 if (response.status >= 200 && response.status < 300) {
                     this.handleCloseStore();
                     this.fetchStores(); // Refresh store data after submit
@@ -114,7 +116,7 @@ class StoreList extends React.Component {
 
         if (deleteStoreId) {
             try {
-                const response = await axios.delete(`https://localhost:7178/api/Stores/${deleteStoreId}`);
+                const response = await axios.delete(`${apiUrl}/api/stores/${deleteStoreId}`);
                 if (response.status >= 200 && response.status < 300) {
                     this.setState({ deleteConfirmationOpen: false, deleteStoreId: null });
                     this.fetchStores(); // Refresh store data after delete
@@ -131,7 +133,7 @@ class StoreList extends React.Component {
 
     handleRowClick = async (storeId) => {
         try {
-            const response = await axios.get(`https://localhost:7178/api/Stores/${storeId}`);
+            const response = await axios.get(`${apiUrl}/api/stores/${storeId}`);
             if (response.status >= 200 && response.status < 300) {
                 const storeDetails = response.data;
                 this.setState({
@@ -217,7 +219,7 @@ class StoreList extends React.Component {
                     <Modal.Content>
                         <Form>
                             <Form.Field>
-                                <label>NAME</label>
+                                <label>Name</label>
                                 <input
                                     name="storeName"
                                     value={storeName}
@@ -225,7 +227,7 @@ class StoreList extends React.Component {
                                 />
                             </Form.Field>
                             <Form.Field>
-                                <label>ADDRESS</label>
+                                <label>Address</label>
                                 <input
                                     name="storeAddress"
                                     value={storeAddress}

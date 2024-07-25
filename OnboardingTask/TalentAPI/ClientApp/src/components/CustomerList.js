@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { Button, Modal, Form, Table, Icon, Pagination } from 'semantic-ui-react';
+import { apiUrl } from '../config'; // Adjust the path if necessary
 
 class CustomerList extends React.Component {
     state = {
@@ -23,7 +24,7 @@ class CustomerList extends React.Component {
 
     fetchCustomers = async () => {
         try {
-            const response = await axios.get('https://localhost:7178/api/Customers');
+            const response = await axios.get(`${apiUrl}/api/customers`);
             if (response.status >= 200 && response.status < 300) {
                 this.setState({ customers: response.data });
             } else {
@@ -37,7 +38,7 @@ class CustomerList extends React.Component {
     handleOpen = async (isEditing = false, customer = null) => {
         if (isEditing && customer) {
             try {
-                const response = await axios.get(`https://localhost:7178/api/Customers/${customer.id}`);
+                const response = await axios.get(`${apiUrl}/api/customers/${customer.id}`);
                 if (response.status >= 200 && response.status < 300) {
                     const customerDetails = response.data;
                     this.setState({
@@ -81,7 +82,7 @@ class CustomerList extends React.Component {
         try {
             if (isEditing) {
                 if (editCustomerId) {
-                    const response = await axios.put(`https://localhost:7178/api/Customers/${editCustomerId}`, customerData);
+                    const response = await axios.put(`${apiUrl}/api/customers/${editCustomerId}`, customerData);
                     if (response.status >= 200 && response.status < 300) {
                         this.handleClose();
                         this.fetchCustomers();  // Refresh data
@@ -92,7 +93,7 @@ class CustomerList extends React.Component {
                     console.error('No customer ID provided for update');
                 }
             } else {
-                const response = await axios.post('https://localhost:7178/api/Customers/', customerData);
+                const response = await axios.post(`${apiUrl}/api/customers/`, customerData);
                 if (response.status >= 200 && response.status < 300) {
                     this.handleClose();
                     this.fetchCustomers();  // Refresh data
@@ -114,7 +115,7 @@ class CustomerList extends React.Component {
 
         if (deleteCustomerId) {
             try {
-                const response = await axios.delete(`https://localhost:7178/api/Customers/${deleteCustomerId}`);
+                const response = await axios.delete(`${apiUrl}/api/customers/${deleteCustomerId}`);
                 if (response.status >= 200 && response.status < 300) {
                     this.setState({ deleteConfirmationOpen: false, deleteCustomerId: null });
                     this.fetchCustomers();  // Refresh data
@@ -131,7 +132,7 @@ class CustomerList extends React.Component {
 
     handleRowClick = async (customerId) => {
         try {
-            const response = await axios.get(`https://localhost:7178/api/Customers/${customerId}`);
+            const response = await axios.get(`${apiUrl}/api/customers/${customerId}`);
             if (response.status >= 200 && response.status < 300) {
                 const customerDetails = response.data;
                 this.setState({

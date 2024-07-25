@@ -1,26 +1,29 @@
 ﻿<Properties StartupConfiguration="{1D532C19-744D-4713-A0B6-B0C593BD60BF}|https">
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.ItemProperties.DevTalentOnboardingAnu PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workbench ActiveDocument="../TalentAPI/ClientApp/src/components/SalesModal.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Program.cs">
     <Files>
-      <File FileName="Program.cs" Line="21" Column="4" />
-      <File FileName="../TalentAPI/ClientApp/src/components/SalesModal.js" Line="231" Column="1" />
+      <File FileName="Program.cs" Line="12" Column="2" />
+      <File FileName="../TalentAPI/ClientApp/src/config.js" Line="2" Column="1" />
+      <File FileName="../TalentAPI/ClientApp/src/components/ProductList.js" Line="11" Column="26" />
+      <File FileName="../TalentAPI/ClientApp/src/components/CustomerList.js" Line="22" Column="31" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="DevTalentOnboardingAnu" expanded="True">
             <Node name="DevTalentOnboardingAnu">
-              <Node name="Controllers" expanded="True" />
+              <Node name="Program.cs" selected="True" />
             </Node>
             <Node name="TalentAPI">
               <Node name="ClientApp" expanded="True">
                 <Node name="src" expanded="True">
-                  <Node name="components" expanded="True">
-                    <Node name="SalesModal.js" selected="True" />
-                  </Node>
+                  <Node name="components" expanded="True" />
                 </Node>
               </Node>
             </Node>
@@ -29,7 +32,4 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
 </Properties>
