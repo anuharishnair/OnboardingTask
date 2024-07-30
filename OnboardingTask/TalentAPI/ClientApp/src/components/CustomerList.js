@@ -16,6 +16,8 @@ class CustomerList extends React.Component {
         selectedCustomerId: null,
         currentPage: 1,
         customersPerPage: 8,
+        nameError: false,
+        addressError: false,
     };
 
     componentDidMount() {
@@ -77,6 +79,15 @@ class CustomerList extends React.Component {
 
     handleSubmit = async () => {
         const { name, address, isEditing, editCustomerId } = this.state;
+
+        // Reset error states
+        this.setState({ nameError: !name, addressError: !address });
+
+        // Validate fields
+        if (!name || !address) {
+            return;
+        }
+
         const customerData = { name, address };
 
         try {
@@ -204,7 +215,7 @@ class CustomerList extends React.Component {
     };
 
     render() {
-        const { name, address, modalOpen, isEditing, deleteConfirmationOpen } = this.state;
+        const { name, address, modalOpen, isEditing, deleteConfirmationOpen, nameError, addressError } = this.state;
 
         return (
             <div style={{ paddingTop: '100px', textAlign: 'left' }}>
@@ -217,21 +228,23 @@ class CustomerList extends React.Component {
                     <Modal.Header>{isEditing ? 'Edit Customer' : 'Create Customer'}</Modal.Header>
                     <Modal.Content>
                         <Form>
-                            <Form.Field>
+                            <Form.Field error={nameError}>
                                 <label>NAME</label>
                                 <input
                                     name="name"
                                     value={name}
                                     onChange={this.handleChange}
                                 />
+                                {nameError && <div style={{ color: 'red' }}>Name is required</div>}
                             </Form.Field>
-                            <Form.Field>
+                            <Form.Field error={addressError}>
                                 <label>ADDRESS</label>
                                 <input
                                     name="address"
                                     value={address}
                                     onChange={this.handleChange}
                                 />
+                                {addressError && <div style={{ color: 'red' }}>Address is required</div>}
                             </Form.Field>
                             <Button onClick={this.handleClose}>Cancel</Button>
                             <Button positive onClick={this.handleSubmit}>

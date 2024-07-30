@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Table, Icon, Pagination } from 'semantic-ui-react';
 import axios from 'axios';
-import { apiUrl } from '../config'; // Adjust the path if necessary
+import { apiUrl } from '../config';
 
 const SalesModal = () => {
     const [sales, setSales] = useState([]);
@@ -29,13 +29,10 @@ const SalesModal = () => {
                 axios.get(`${apiUrl}/api/products`),
                 axios.get(`${apiUrl}/api/stores`)
             ]);
-            // Validate responses
             if (Array.isArray(salesResponse.data) &&
                 Array.isArray(customersResponse.data) &&
                 Array.isArray(productsResponse.data) &&
                 Array.isArray(storesResponse.data)) {
-
-                // Update states with validated data
                 setSales(salesResponse.data);
                 setCustomers(customersResponse.data);
                 setProducts(productsResponse.data);
@@ -134,7 +131,7 @@ const SalesModal = () => {
                 const { id, dateSold, customerId, productId, storeId } = sale;
                 setModalOpen(true);
                 setCurrentSaleId(id);
-                setDateSold(dateSold);
+                setDateSold(formatDateForInput(dateSold));
                 setCustomerId(customerId);
                 setProductId(productId);
                 setStoreId(storeId);
@@ -228,6 +225,23 @@ const SalesModal = () => {
         }
     };
 
+    const formatDateForDisplay = (dateString) => {
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+        const formattedDate = date.toLocaleDateString('en-US', options);
+        const [month, day, year] = formattedDate.replace(/,/g, '').split(' ');
+        return `${day} ${month}, ${year}`;
+    };
+
+    const formatDateForInput = (dateString) => {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+
     const renderSalesRows = () => {
         if (!Array.isArray(currentSales)) {
             console.error('Error: currentSales is not an array');
@@ -239,7 +253,7 @@ const SalesModal = () => {
                 <Table.Cell>{getCustomerName(sale.customerId)}</Table.Cell>
                 <Table.Cell>{getProductName(sale.productId)}</Table.Cell>
                 <Table.Cell>{getStoreName(sale.storeId)}</Table.Cell>
-                <Table.Cell>{sale.dateSold}</Table.Cell>
+                <Table.Cell>{formatDateForDisplay(sale.dateSold)}</Table.Cell>
                 <Table.Cell>
                     <Button color="yellow" onClick={() => handleOpen(sale)}>
                         <Icon name="edit" /> Edit

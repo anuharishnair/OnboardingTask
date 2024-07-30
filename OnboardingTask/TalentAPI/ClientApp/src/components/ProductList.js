@@ -16,6 +16,8 @@ class ProductList extends React.Component {
         selectedProductId: null,
         currentPage: 1,
         productsPerPage: 8,
+        nameError: false,
+        addressError: false,
     };
 
     componentDidMount() {
@@ -77,6 +79,15 @@ class ProductList extends React.Component {
 
     handleSubmit = async () => {
         const { productName, productPrice, isEditingProduct, editProductId } = this.state;
+
+        // Reset error states
+        this.setState({ productNameError: !productName, productPriceError: !productPrice });
+
+        // Validate fields
+        if (!productName || !productPrice) {
+            return;
+        }
+
         const productData = { name: productName, price: productPrice };
 
         try {
@@ -204,32 +215,36 @@ class ProductList extends React.Component {
     };
 
     render() {
-        const { productName, productPrice, modalOpen, isEditingProduct, deleteConfirmationOpen } = this.state;
+        const { productName, productPrice, modalOpen, isEditingProduct, deleteConfirmationOpen, productNameError, productPriceError } = this.state;
 
         return (
             <div style={{ paddingTop: '100px', textAlign: 'left' }}>
                 <Button primary onClick={() => this.handleOpen(false)}>
                     New Product
                 </Button>
+
+                {/* Product Modal */}
                 <Modal open={modalOpen} onClose={this.handleClose}>
                     <Modal.Header>{isEditingProduct ? 'Edit Product' : 'Create Product'}</Modal.Header>
                     <Modal.Content>
                         <Form>
-                            <Form.Field>
+                            <Form.Field error={productNameError}>
                                 <label>NAME</label>
                                 <input
                                     name="productName"
                                     value={productName}
                                     onChange={this.handleChange}
                                 />
+                                {productNameError && <div style={{ color: 'red' }}>Product name is required</div>}
                             </Form.Field>
-                            <Form.Field>
+                            <Form.Field error={productPriceError}>
                                 <label>PRICE</label>
                                 <input
                                     name="productPrice"
                                     value={productPrice}
                                     onChange={this.handleChange}
                                 />
+                                {productPriceError && <div style={{ color: 'red' }}>Product price is required</div>}
                             </Form.Field>
                             <Button onClick={this.handleClose}>Cancel</Button>
                             <Button positive onClick={this.handleSubmit}>
@@ -239,6 +254,7 @@ class ProductList extends React.Component {
                     </Modal.Content>
                 </Modal>
 
+                {/* Delete Confirmation Modal */}
                 <Modal open={deleteConfirmationOpen} onClose={() => this.setState({ deleteConfirmationOpen: false })}>
                     <Modal.Header>Delete Product</Modal.Header>
                     <Modal.Content>
@@ -250,6 +266,7 @@ class ProductList extends React.Component {
                     </Modal.Actions>
                 </Modal>
 
+                {/* Product Table */}
                 <Table celled style={{ marginTop: '20px' }}>
                     <Table.Header>
                         <Table.Row>
@@ -264,10 +281,12 @@ class ProductList extends React.Component {
                     </Table.Body>
                 </Table>
 
+                {/* Pagination */}
                 {this.renderPagination()}
             </div>
         );
     }
+
 }
 
 export default ProductList;

@@ -1,8 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { Button, Modal, Form, Table, Icon, Pagination } from 'semantic-ui-react';
-
-const apiUrl = process.env.REACT_APP_API_URL || 'https://talentapp-bzfjg2htcwgtfzf7.australiaeast-01.azurewebsites.net';
+import { apiUrl } from '../config';
 
 class StoreList extends React.Component {
     state = {
@@ -17,6 +16,8 @@ class StoreList extends React.Component {
         selectedStoreId: null,
         currentPage: 1,
         storesPerPage: 8,
+        storeNameError: false,
+        storeAddressError: false,
     };
 
     componentDidMount() {
@@ -69,6 +70,8 @@ class StoreList extends React.Component {
             storeAddress: '',
             editStoreId: null,
             deleteConfirmationOpen: false,
+            storeNameError: false,
+            storeAddressError: false,
         });
     };
 
@@ -78,6 +81,15 @@ class StoreList extends React.Component {
 
     handleStoreSubmit = async () => {
         const { storeName, storeAddress, isEditingStore, editStoreId } = this.state;
+
+        // Reset error states
+        this.setState({ storeNameError: !storeName, storeAddressError: !storeAddress });
+
+        // Validate fields
+        if (!storeName || !storeAddress) {
+            return;
+        }
+
         const storeData = { name: storeName, address: storeAddress };
 
         try {
@@ -205,7 +217,7 @@ class StoreList extends React.Component {
     };
 
     render() {
-        const { storeName, storeAddress, modalOpen, isEditingStore, deleteConfirmationOpen } = this.state;
+        const { storeName, storeAddress, modalOpen, isEditingStore, deleteConfirmationOpen, storeNameError, storeAddressError } = this.state;
 
         return (
             <div style={{ paddingTop: '100px', textAlign: 'left' }}>
@@ -218,21 +230,23 @@ class StoreList extends React.Component {
                     <Modal.Header>{isEditingStore ? 'Edit Store' : 'Create Store'}</Modal.Header>
                     <Modal.Content>
                         <Form>
-                            <Form.Field>
+                            <Form.Field error={storeNameError}>
                                 <label>Name</label>
                                 <input
                                     name="storeName"
                                     value={storeName}
                                     onChange={this.handleStoreChange}
                                 />
+                                {storeNameError && <div style={{ color: 'red' }}>Name is required</div>}
                             </Form.Field>
-                            <Form.Field>
+                            <Form.Field error={storeAddressError}>
                                 <label>Address</label>
                                 <input
                                     name="storeAddress"
                                     value={storeAddress}
                                     onChange={this.handleStoreChange}
                                 />
+                                {storeAddressError && <div style={{ color: 'red' }}>Address is required</div>}
                             </Form.Field>
                             <Button onClick={this.handleCloseStore}>Cancel</Button>
                             <Button positive onClick={this.handleStoreSubmit}>
